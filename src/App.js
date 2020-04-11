@@ -1,26 +1,48 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
+import api from "./services/api";
 
 import "./styles.css";
 
 function App() {
+  const [respositories, setRepositories] = useState([])
+
+  useEffect(()=>{
+    api.get('repositories').then(response =>{
+      setRepositories(response.data);
+    })
+
+  }, [])
+
   async function handleAddRepository() {
-    // TODO
-  }
+    const response = await api.post('repositories',{
+      title:'Be The Hero BackEnd', 
+      url:'https://github.com/antoniojr0007/BeTheHero-BackEnd', 
+      techs:['Node.js']
+    })
+
+    setRepositories([...respositories, response.data]);
+
+   }
 
   async function handleRemoveRepository(id) {
-    // TODO
+    await api.delete(`repositories/${id}`)
+
+    setRepositories(respositories.filter(
+      respository => respository.id !== id
+    ))
   }
 
   return (
     <div>
       <ul data-testid="repository-list">
-        <li>
-          Repositório 1
-
-          <button onClick={() => handleRemoveRepository(1)}>
-            Remover
-          </button>
-        </li>
+        {respositories.map(respository =>(
+          <li key={respository.id}>
+            {respository.title}
+            <button onClick={() => handleRemoveRepository(respository.id)}>
+              Remover
+            </button>
+          </li>
+        ))}
       </ul>
 
       <button onClick={handleAddRepository}>Adicionar</button>
